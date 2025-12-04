@@ -7,6 +7,12 @@ import { CalculusCalculator } from '@/components/calculator/CalculusCalculator';
 import { StatisticsCalculator } from '@/components/calculator/StatisticsCalculator';
 import { UnitConverter } from '@/components/calculator/UnitConverter';
 import { ErrorChecker } from '@/components/calculator/ErrorChecker';
+import { MatrixCalculator } from '@/components/calculator/MatrixCalculator';
+import { PiecewiseCalculator } from '@/components/calculator/PiecewiseCalculator';
+import { ComplexCalculator } from '@/components/calculator/ComplexCalculator';
+import { EquationSolver } from '@/components/calculator/EquationSolver';
+import { BaseConverter } from '@/components/calculator/BaseConverter';
+import { PhysicsCalculator } from '@/components/calculator/PhysicsCalculator';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const Index = () => {
@@ -19,12 +25,24 @@ const Index = () => {
         return <ScientificCalculator />;
       case 'graphing':
         return <GraphingCalculator />;
+      case 'piecewise':
+        return <PiecewiseCalculator />;
       case 'calculus':
         return <CalculusCalculator />;
+      case 'matrix':
+        return <MatrixCalculator />;
+      case 'equations':
+        return <EquationSolver />;
+      case 'complex':
+        return <ComplexCalculator />;
       case 'statistics':
         return <StatisticsCalculator />;
+      case 'physics':
+        return <PhysicsCalculator />;
       case 'units':
         return <UnitConverter />;
+      case 'base':
+        return <BaseConverter />;
       case 'errors':
         return <ErrorChecker />;
       default:
@@ -33,25 +51,25 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header />
       
-      <main className="container mx-auto px-4 py-6">
+      <main className="flex-1 container mx-auto px-4 py-4">
         {isMobile ? (
-          // Mobile Layout
-          <div className="space-y-4">
+          // Mobile Layout - Full height
+          <div className="flex flex-col h-full space-y-4">
             <Navigation activeMode={activeMode} onModeChange={setActiveMode} />
-            <div className="glass-panel p-4">
+            <div className="glass-panel p-4 flex-1 overflow-y-auto">
               {renderCalculator()}
             </div>
           </div>
         ) : (
-          // Desktop Layout
-          <div className="grid grid-cols-[280px,1fr] gap-6">
-            <aside className="glass-panel p-4 h-fit sticky top-24">
+          // Desktop Layout - Full width with sidebar
+          <div className="grid grid-cols-[260px,1fr] gap-6 h-[calc(100vh-8rem)]">
+            <aside className="glass-panel p-4 overflow-y-auto sticky top-20">
               <NavigationVertical activeMode={activeMode} onModeChange={setActiveMode} />
             </aside>
-            <div className="glass-panel p-6 max-w-2xl">
+            <div className="glass-panel p-6 overflow-y-auto">
               {renderCalculator()}
             </div>
           </div>
@@ -59,9 +77,21 @@ const Index = () => {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border/50 py-6 mt-12">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>Graphium Calculator • Built with precision in mind</p>
+      <footer className="border-t border-border/50 py-4">
+        <div className="container mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
+          <p>Graphium Calculator • Built for students & engineers</p>
+          <div className="flex items-center gap-4">
+            <a
+              href="https://github.com/ShubhaRijal"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-primary transition-colors"
+            >
+              Created by Shubha Rijal
+            </a>
+            <span className="hidden sm:inline">•</span>
+            <span className="hidden sm:inline">v1.0.0</span>
+          </div>
         </div>
       </footer>
     </div>
