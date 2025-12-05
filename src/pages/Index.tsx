@@ -79,19 +79,8 @@ const Index = () => {
       {/* Footer */}
       <footer className="border-t border-border/50 py-4">
         <div className="container mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
-          <p>Graphium Calculator • Built for students & engineers</p>
-          <div className="flex items-center gap-4">
-            <a
-              href="https://github.com/ShubhaRijal"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-primary transition-colors"
-            >
-              Created by Shubha Rijal
-            </a>
-            <span className="hidden sm:inline">•</span>
-            <span className="hidden sm:inline">v1.0.0</span>
-          </div>
+          <p>Graphium Calculator • Built for students</p>
+          <span>v1.0.0</span>
         </div>
       </footer>
     </div>
