@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { GraphiumLogo } from '@/components/GraphiumLogo';
+import graphiumLogo from '@/assets/graphium-logo.png';
 import { ArrowLeft, Github, Calculator, Sigma, LineChart, Atom, Users, Target, Lightbulb, Rocket } from 'lucide-react';
 
 export default function About() {
@@ -18,7 +18,7 @@ export default function About() {
             <Button variant="ghost" size="icon" className="mr-2">
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <GraphiumLogo size={36} />
+            <img src={graphiumLogo} alt="Graphium" className="h-9 w-9" />
             <span className="text-xl font-semibold tracking-tight">Graphium</span>
           </Link>
         </div>
