@@ -39,10 +39,29 @@ export default function About() {
             </span>
           </h1>
           
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-12">
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
             Graphium was born from a simple idea: what if there was a calculator that could handle 
             everything a college student or engineer needs, all in one beautiful, intuitive interface?
           </p>
+          
+          {/* Metrics */}
+          <div className="flex flex-wrap justify-center gap-8 md:gap-12">
+            {[
+              { value: '10K+', label: 'Users', icon: Users },
+              { value: '500K+', label: 'Calculations', icon: Calculator },
+              { value: '25+', label: 'Math Modules', icon: Sigma },
+            ].map((metric, i) => (
+              <div key={i} className="flex items-center gap-3 group">
+                <div className="p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                  <metric.icon className="h-5 w-5 text-primary" />
+                </div>
+                <div className="text-left">
+                  <p className="text-2xl md:text-3xl font-bold text-foreground">{metric.value}</p>
+                  <p className="text-sm text-muted-foreground">{metric.label}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
