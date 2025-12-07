@@ -41,15 +41,15 @@ export default function About() {
           
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
             Graphium was born from a simple idea: what if there was a calculator that could handle 
-            everything a college student or engineer needs, all in one beautiful, intuitive interface?
+            everything a student needs, all in one beautiful, intuitive interface?
           </p>
           
-          {/* Metrics */}
+          {/* Metrics - Realistic starting numbers */}
           <div className="flex flex-wrap justify-center gap-8 md:gap-12">
             {[
-              { value: '10K+', label: 'Users', icon: Users },
-              { value: '500K+', label: 'Calculations', icon: Calculator },
-              { value: '25+', label: 'Math Modules', icon: Sigma },
+              { value: '50+', label: 'Users', icon: Users },
+              { value: '1K+', label: 'Calculations', icon: Calculator },
+              { value: '18', label: 'Math Modules', icon: Sigma },
             ].map((metric, i) => (
               <div key={i} className="flex items-center gap-3 group">
                 <div className="p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
@@ -76,7 +76,7 @@ export default function About() {
               </h2>
               <div className="space-y-4 text-muted-foreground">
                 <p>
-                  As engineering students ourselves, we were frustrated by the fragmented landscape 
+                  As students ourselves, we were frustrated by the fragmented landscape 
                   of calculators and math tools. Need to graph a function? Open one app. Solve a 
                   matrix? Open another. Convert units? Yet another tool.
                 </p>
@@ -87,7 +87,7 @@ export default function About() {
                 </p>
                 <p>
                   <strong className="text-foreground">Graphium is our answer.</strong> A comprehensive 
-                  mathematical toolkit designed specifically for students and engineers who demand 
+                  mathematical toolkit designed specifically for students who demand 
                   more from their tools.
                 </p>
               </div>
@@ -128,7 +128,7 @@ export default function About() {
                 <h2 className="text-2xl md:text-3xl font-bold mb-4">Our Mission</h2>
                 <p className="text-muted-foreground text-lg">
                   To democratize advanced mathematical computing by providing every student 
-                  and engineer with access to professional-grade tools that are free, beautiful, 
+                  with access to professional-grade tools that are free, beautiful, 
                   and incredibly powerful. We believe great tools shouldn't require expensive 
                   software licenses or years of learning curve.
                 </p>
@@ -138,7 +138,7 @@ export default function About() {
         </div>
       </section>
 
-      {/* The Creators */}
+      {/* The Creators - MS Studios */}
       <section className="relative z-10 container mx-auto px-4 py-16 pb-32">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
@@ -149,38 +149,27 @@ export default function About() {
             <h2 className="text-3xl md:text-4xl font-bold">The Creators</h2>
           </div>
           
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* Developer M */}
-            <div className="glass-panel p-6 text-center group hover:border-primary/50 transition-all">
-              <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center ring-4 ring-primary/10">
-                <span className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">M</span>
-              </div>
-              <h3 className="text-xl font-semibold mb-1">Developer M</h3>
-              <p className="text-primary mb-3">Co-Creator & Developer</p>
-              <p className="text-sm text-muted-foreground mb-4">
-                Passionate about building tools that make complex mathematics accessible to everyone.
-              </p>
-              <Button variant="outline" size="sm" disabled className="opacity-50">
-                <Github className="h-4 w-4 mr-2" />
-                Coming Soon
-              </Button>
+          {/* MS Studios Card */}
+          <div className="glass-panel p-8 md:p-10 text-center group hover:border-primary/50 transition-all max-w-2xl mx-auto">
+            <div className="w-28 h-28 mx-auto mb-6 rounded-full bg-gradient-to-br from-primary/30 to-accent/30 flex items-center justify-center ring-4 ring-primary/20">
+              <span className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">MS</span>
             </div>
-            
-            {/* Developer S */}
-            <div className="glass-panel p-6 text-center group hover:border-primary/50 transition-all">
-              <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center ring-4 ring-primary/10">
-                <span className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">S</span>
-              </div>
-              <h3 className="text-xl font-semibold mb-1">Developer S</h3>
-              <p className="text-primary mb-3">Co-Creator & Developer</p>
-              <p className="text-sm text-muted-foreground mb-4">
-                Engineering student dedicated to creating elegant solutions for complex computational problems.
-              </p>
+            <h3 className="text-2xl font-bold mb-2">MS Studios</h3>
+            <p className="text-primary mb-4">Developers of Graphium</p>
+            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+              A duo of passionate students building tools that make complex mathematics accessible to everyone. 
+              We create elegant, powerful solutions for students who demand more from their tools.
+            </p>
+            <div className="flex justify-center gap-4">
               <Button variant="outline" size="sm" asChild className="hover:bg-primary hover:text-primary-foreground transition-colors">
                 <a href="https://github.com/ShubhaRijal" target="_blank" rel="noopener noreferrer">
                   <Github className="h-4 w-4 mr-2" />
-                  GitHub Profile
+                  S's GitHub
                 </a>
+              </Button>
+              <Button variant="outline" size="sm" disabled className="opacity-50">
+                <Github className="h-4 w-4 mr-2" />
+                M's GitHub (Soon)
               </Button>
             </div>
           </div>
@@ -194,7 +183,7 @@ export default function About() {
             <Lightbulb className="h-10 w-10 text-primary mx-auto mb-4" />
             <h2 className="text-2xl md:text-3xl font-bold mb-4">Ready to Experience Graphium?</h2>
             <p className="text-muted-foreground mb-6">
-              Join thousands of students and engineers who are already using Graphium 
+              Join students who are already using Graphium 
               to power their calculations.
             </p>
             <Button asChild size="lg" className="glow-primary">
