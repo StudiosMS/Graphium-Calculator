@@ -1,43 +1,9 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import graphiumLogo from '@/assets/graphium-logo.png';
-import msStudiosLogo from '@/assets/ms-studios-logo.png';
 import { ArrowLeft, Github, Calculator, Sigma, LineChart, Atom, Users, Target, Lightbulb, Rocket } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 
 export default function About() {
-  const [userCount, setUserCount] = useState<number>(0);
-
-  useEffect(() => {
-    // Generate or get visitor ID from localStorage
-    let visitorId = localStorage.getItem('graphium_visitor_id');
-    if (!visitorId) {
-      visitorId = crypto.randomUUID();
-      localStorage.setItem('graphium_visitor_id', visitorId);
-    }
-
-    // Track this visit and get count
-    const trackVisit = async () => {
-      // Try to insert new visitor, ignore if already exists
-      await supabase
-        .from('visitor_stats')
-        .upsert(
-          { visitor_id: visitorId, last_visit: new Date().toISOString() },
-          { onConflict: 'visitor_id' }
-        );
-
-      // Get total unique visitors
-      const { count } = await supabase
-        .from('visitor_stats')
-        .select('*', { count: 'exact', head: true });
-
-      setUserCount(count || 0);
-    };
-
-    trackVisit();
-  }, []);
-
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Background gradient circles */}
@@ -78,19 +44,16 @@ export default function About() {
             everything a student needs, all in one beautiful, intuitive interface?
           </p>
           
-          {/* Metrics - Live user count */}
+          {/* Metrics - Realistic starting numbers */}
           <div className="flex flex-wrap justify-center gap-8 md:gap-12">
             {[
-              { value: userCount > 0 ? `${userCount}` : '...', label: 'Users', icon: Users, live: true },
-              { value: '1K+', label: 'Calculations', icon: Calculator, live: false },
-              { value: '18', label: 'Math Modules', icon: Sigma, live: false },
+              { value: '50+', label: 'Users', icon: Users },
+              { value: '1K+', label: 'Calculations', icon: Calculator },
+              { value: '18', label: 'Math Modules', icon: Sigma },
             ].map((metric, i) => (
               <div key={i} className="flex items-center gap-3 group">
-                <div className="p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors relative">
+                <div className="p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
                   <metric.icon className="h-5 w-5 text-primary" />
-                  {metric.live && (
-                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse" />
-                  )}
                 </div>
                 <div className="text-left">
                   <p className="text-2xl md:text-3xl font-bold text-foreground">{metric.value}</p>
@@ -175,7 +138,7 @@ export default function About() {
         </div>
       </section>
 
-      {/* Developer - MS Studios */}
+      {/* The Creators - MS Studios */}
       <section className="relative z-10 container mx-auto px-4 py-16 pb-32">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
@@ -183,28 +146,32 @@ export default function About() {
               <Users className="h-4 w-4 text-primary" />
               <span className="text-sm text-primary">Meet the Team</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold">Developer</h2>
+            <h2 className="text-3xl md:text-4xl font-bold">The Creators</h2>
           </div>
           
           {/* MS Studios Card */}
           <div className="glass-panel p-8 md:p-10 text-center group hover:border-primary/50 transition-all max-w-2xl mx-auto">
-            <img 
-              src={msStudiosLogo} 
-              alt="MS Studios" 
-              className="w-32 h-32 mx-auto mb-6 rounded-full object-cover ring-4 ring-primary/20"
-            />
+            <div className="w-28 h-28 mx-auto mb-6 rounded-full bg-gradient-to-br from-primary/30 to-accent/30 flex items-center justify-center ring-4 ring-primary/20">
+              <span className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">MS</span>
+            </div>
             <h3 className="text-2xl font-bold mb-2">MS Studios</h3>
             <p className="text-primary mb-4">Developers of Graphium</p>
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
               A duo of passionate students building tools that make complex mathematics accessible to everyone. 
               We create elegant, powerful solutions for students who demand more from their tools.
             </p>
-            <Button variant="outline" size="sm" asChild className="hover:bg-primary hover:text-primary-foreground transition-colors">
-              <a href="https://github.com/ShubhaRijal" target="_blank" rel="noopener noreferrer">
+            <div className="flex justify-center gap-4">
+              <Button variant="outline" size="sm" asChild className="hover:bg-primary hover:text-primary-foreground transition-colors">
+                <a href="https://github.com/ShubhaRijal" target="_blank" rel="noopener noreferrer">
+                  <Github className="h-4 w-4 mr-2" />
+                  S's GitHub
+                </a>
+              </Button>
+              <Button variant="outline" size="sm" disabled className="opacity-50">
                 <Github className="h-4 w-4 mr-2" />
-                GitHub
-              </a>
-            </Button>
+                M's GitHub (Soon)
+              </Button>
+            </div>
           </div>
         </div>
       </section>

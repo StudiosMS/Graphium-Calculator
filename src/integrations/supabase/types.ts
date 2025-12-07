@@ -14,27 +14,7 @@ export type Database = {
   }
   public: {
     Tables: {
-      visitor_stats: {
-        Row: {
-          first_visit: string
-          id: string
-          last_visit: string
-          visitor_id: string
-        }
-        Insert: {
-          first_visit?: string
-          id?: string
-          last_visit?: string
-          visitor_id: string
-        }
-        Update: {
-          first_visit?: string
-          id?: string
-          last_visit?: string
-          visitor_id?: string
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Views: {
       [_ in never]: never
