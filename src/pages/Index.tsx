@@ -80,7 +80,7 @@ const Index = () => {
       <footer className="border-t border-border/50 py-4">
         <div className="container mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
           <p>Graphium Calculator • Built for students</p>
-          <span>v1.0.0</span>
+          <span>v1.0.3</span>
         </div>
       </footer>
     </div>
