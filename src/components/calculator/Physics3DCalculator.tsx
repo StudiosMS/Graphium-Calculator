@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Play, Pause, RotateCcw, Box, Orbit } from 'lucide-react';
+import { Play, Pause, RotateCcw, Box, Orbit, Waves, Zap, Magnet } from 'lucide-react';
 import * as THREE from 'three';
 
 const GRAVITY = 9.81;
@@ -228,6 +228,296 @@ function OrbitalMotion({ radius, period, isPlaying }: { radius: number; period: 
   );
 }
 
+// Wave simulation
+function WaveSimulation({ amplitude, wavelength, frequency, isPlaying }: { amplitude: number; wavelength: number; frequency: number; isPlaying: boolean }) {
+  const meshRef = useRef<THREE.Mesh>(null);
+  const timeRef = useRef(0);
+  const resolution = 100;
+  
+  const positions = useMemo(() => {
+    return new Float32Array(resolution * 3);
+  }, []);
+
+  useFrame((_, delta) => {
+    if (!meshRef.current) return;
+    
+    if (isPlaying) {
+      timeRef.current += delta;
+    }
+    
+    const geometry = meshRef.current.geometry as THREE.BufferGeometry;
+    const posAttr = geometry.getAttribute('position');
+    
+    for (let i = 0; i < resolution; i++) {
+      const x = (i / resolution) * 10 - 5;
+      const k = (2 * Math.PI) / wavelength;
+      const omega = 2 * Math.PI * frequency;
+      const y = amplitude * Math.sin(k * x - omega * timeRef.current);
+      
+      posAttr.setXYZ(i, x, y, 0);
+    }
+    posAttr.needsUpdate = true;
+  });
+
+  useEffect(() => {
+    if (!isPlaying) {
+      timeRef.current = 0;
+    }
+  }, [isPlaying]);
+
+  // Initialize positions
+  const initialPositions = useMemo(() => {
+    const pos = [];
+    for (let i = 0; i < resolution; i++) {
+      const x = (i / resolution) * 10 - 5;
+      pos.push(x, 0, 0);
+    }
+    return new Float32Array(pos);
+  }, []);
+
+  return (
+    <group>
+      {/* Wave line */}
+      <line>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={resolution}
+            array={initialPositions}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <lineBasicMaterial color="#00d4ff" linewidth={3} />
+      </line>
+      {/* Invisible mesh for ref */}
+      <mesh ref={meshRef} visible={false}>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={resolution}
+            array={initialPositions}
+            itemSize={3}
+          />
+        </bufferGeometry>
+      </mesh>
+      {/* Wave particles */}
+      {Array.from({ length: 20 }).map((_, i) => (
+        <WaveParticle 
+          key={i} 
+          x={(i / 20) * 10 - 5} 
+          amplitude={amplitude} 
+          wavelength={wavelength} 
+          frequency={frequency} 
+          isPlaying={isPlaying}
+          timeRef={timeRef}
+        />
+      ))}
+    </group>
+  );
+}
+
+function WaveParticle({ x, amplitude, wavelength, frequency, isPlaying, timeRef }: { 
+  x: number; amplitude: number; wavelength: number; frequency: number; isPlaying: boolean; timeRef: React.MutableRefObject<number> 
+}) {
+  const meshRef = useRef<THREE.Mesh>(null);
+  
+  useFrame(() => {
+    if (!meshRef.current) return;
+    const k = (2 * Math.PI) / wavelength;
+    const omega = 2 * Math.PI * frequency;
+    const y = amplitude * Math.sin(k * x - omega * timeRef.current);
+    meshRef.current.position.y = y;
+  });
+
+  return (
+    <mesh ref={meshRef} position={[x, 0, 0]}>
+      <sphereGeometry args={[0.08, 16, 16]} />
+      <meshStandardMaterial color="#00d4ff" emissive="#00d4ff" emissiveIntensity={0.5} />
+    </mesh>
+  );
+}
+
+// Electric field visualization
+function ElectricField({ charge1, charge2, distance, isPlaying }: { charge1: number; charge2: number; distance: number; isPlaying: boolean }) {
+  const linesRef = useRef<THREE.Group>(null);
+  const timeRef = useRef(0);
+
+  useFrame((_, delta) => {
+    if (isPlaying) {
+      timeRef.current += delta;
+    }
+  });
+
+  // Generate field lines
+  const fieldLines = useMemo(() => {
+    const lines: { start: THREE.Vector3; points: THREE.Vector3[] }[] = [];
+    const numLines = 8;
+    const pos1 = new THREE.Vector3(-distance / 2, 0, 0);
+    const pos2 = new THREE.Vector3(distance / 2, 0, 0);
+    
+    for (let i = 0; i < numLines; i++) {
+      const angle = (i / numLines) * Math.PI * 2;
+      const startOffset = new THREE.Vector3(
+        Math.cos(angle) * 0.3,
+        Math.sin(angle) * 0.3,
+        0
+      );
+      
+      const points: THREE.Vector3[] = [];
+      let pos = pos1.clone().add(startOffset);
+      
+      // Trace field line
+      for (let step = 0; step < 50; step++) {
+        points.push(pos.clone());
+        
+        // Calculate field at this point
+        const r1 = pos.clone().sub(pos1);
+        const r2 = pos.clone().sub(pos2);
+        const d1 = r1.length();
+        const d2 = r2.length();
+        
+        if (d1 < 0.2 || d2 < 0.2) break;
+        if (pos.length() > 5) break;
+        
+        const E1 = r1.normalize().multiplyScalar(charge1 / (d1 * d1));
+        const E2 = r2.normalize().multiplyScalar(charge2 / (d2 * d2));
+        const E = E1.add(E2).normalize().multiplyScalar(0.15);
+        
+        pos = pos.add(E);
+      }
+      
+      lines.push({ start: pos1.clone().add(startOffset), points });
+    }
+    
+    return lines;
+  }, [charge1, charge2, distance]);
+
+  const charge1Color = charge1 > 0 ? '#ff4444' : '#4444ff';
+  const charge2Color = charge2 > 0 ? '#ff4444' : '#4444ff';
+
+  return (
+    <group ref={linesRef}>
+      {/* Charge 1 */}
+      <mesh position={[-distance / 2, 0, 0]}>
+        <sphereGeometry args={[0.3, 32, 32]} />
+        <meshStandardMaterial color={charge1Color} emissive={charge1Color} emissiveIntensity={0.5} />
+      </mesh>
+      {/* Charge 2 */}
+      <mesh position={[distance / 2, 0, 0]}>
+        <sphereGeometry args={[0.3, 32, 32]} />
+        <meshStandardMaterial color={charge2Color} emissive={charge2Color} emissiveIntensity={0.5} />
+      </mesh>
+      {/* Field lines */}
+      {fieldLines.map((line, idx) => (
+        <primitive 
+          key={idx}
+          object={new THREE.Line(
+            new THREE.BufferGeometry().setFromPoints(line.points),
+            new THREE.LineBasicMaterial({ color: '#ffaa00', opacity: 0.7, transparent: true })
+          )}
+        />
+      ))}
+      {/* Equipotential circles */}
+      {[1, 2, 3].map((r) => (
+        <group key={`eq1-${r}`}>
+          <mesh position={[-distance / 2, 0, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[r * 0.5 - 0.02, r * 0.5 + 0.02, 32]} />
+            <meshBasicMaterial color="#00ff88" opacity={0.3} transparent side={THREE.DoubleSide} />
+          </mesh>
+          <mesh position={[distance / 2, 0, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[r * 0.5 - 0.02, r * 0.5 + 0.02, 32]} />
+            <meshBasicMaterial color="#00ff88" opacity={0.3} transparent side={THREE.DoubleSide} />
+          </mesh>
+        </group>
+      ))}
+    </group>
+  );
+}
+
+// Magnetic field visualization
+function MagneticField({ current, wireLength, isPlaying }: { current: number; wireLength: number; isPlaying: boolean }) {
+  const timeRef = useRef(0);
+  const particlesRef = useRef<THREE.Group>(null);
+
+  useFrame((_, delta) => {
+    if (!isPlaying || !particlesRef.current) return;
+    timeRef.current += delta;
+    
+    // Animate particles along field lines
+    particlesRef.current.children.forEach((child, idx) => {
+      if (child instanceof THREE.Mesh) {
+        const baseAngle = (idx / 16) * Math.PI * 2;
+        const radius = 1 + (idx % 3) * 0.5;
+        const speed = current > 0 ? 1 : -1;
+        const angle = baseAngle + timeRef.current * speed;
+        child.position.x = Math.cos(angle) * radius;
+        child.position.z = Math.sin(angle) * radius;
+      }
+    });
+  });
+
+  useEffect(() => {
+    timeRef.current = 0;
+  }, [isPlaying]);
+
+  const fieldStrength = Math.abs(current);
+  const direction = current > 0 ? 1 : -1;
+
+  return (
+    <group>
+      {/* Current-carrying wire */}
+      <mesh position={[0, 0, 0]}>
+        <cylinderGeometry args={[0.1, 0.1, wireLength, 16]} />
+        <meshStandardMaterial color="#cc8800" metalness={0.8} roughness={0.2} />
+      </mesh>
+      
+      {/* Current direction arrow */}
+      <mesh position={[0, wireLength / 2 + 0.2, 0]} rotation={[0, 0, direction > 0 ? 0 : Math.PI]}>
+        <coneGeometry args={[0.15, 0.3, 16]} />
+        <meshStandardMaterial color="#ffcc00" emissive="#ffcc00" emissiveIntensity={0.3} />
+      </mesh>
+      
+      {/* Magnetic field circles (B-field) */}
+      {[1, 1.5, 2, 2.5].map((radius, i) => (
+        <group key={`bfield-${i}`}>
+          <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, wireLength / 4, 0]}>
+            <torusGeometry args={[radius, 0.02, 8, 64]} />
+            <meshStandardMaterial color="#8844ff" emissive="#8844ff" emissiveIntensity={0.3} opacity={0.6} transparent />
+          </mesh>
+          <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, -wireLength / 4, 0]}>
+            <torusGeometry args={[radius, 0.02, 8, 64]} />
+            <meshStandardMaterial color="#8844ff" emissive="#8844ff" emissiveIntensity={0.3} opacity={0.6} transparent />
+          </mesh>
+          {/* Direction arrows on field lines */}
+          {[0, 1, 2, 3].map((j) => {
+            const angle = (j / 4) * Math.PI * 2 + (direction > 0 ? 0.2 : -0.2);
+            return (
+              <mesh 
+                key={`arrow-${i}-${j}`}
+                position={[Math.cos(angle) * radius, 0, Math.sin(angle) * radius]}
+                rotation={[0, -angle + (direction > 0 ? Math.PI / 2 : -Math.PI / 2), 0]}
+              >
+                <coneGeometry args={[0.08, 0.2, 8]} />
+                <meshStandardMaterial color="#8844ff" emissive="#8844ff" emissiveIntensity={0.5} />
+              </mesh>
+            );
+          })}
+        </group>
+      ))}
+      
+      {/* Animated particles */}
+      <group ref={particlesRef}>
+        {Array.from({ length: 16 }).map((_, i) => (
+          <mesh key={`particle-${i}`} position={[1, (i % 4 - 1.5) * 0.5, 0]}>
+            <sphereGeometry args={[0.06, 8, 8]} />
+            <meshStandardMaterial color="#ff66ff" emissive="#ff66ff" emissiveIntensity={0.8} />
+          </mesh>
+        ))}
+      </group>
+    </group>
+  );
+}
+
 // Scene wrapper
 function PhysicsScene({ children }: { children: React.ReactNode }) {
   return (
@@ -254,7 +544,7 @@ function PhysicsScene({ children }: { children: React.ReactNode }) {
 }
 
 export function Physics3DCalculator() {
-  const [simulation, setSimulation] = useState<'projectile' | 'pendulum' | 'spring' | 'orbit'>('projectile');
+  const [simulation, setSimulation] = useState<'projectile' | 'pendulum' | 'spring' | 'orbit' | 'wave' | 'electric' | 'magnetic'>('projectile');
   const [isPlaying, setIsPlaying] = useState(false);
   const [result, setResult] = useState<string>('');
   
@@ -275,6 +565,20 @@ export function Physics3DCalculator() {
   // Orbit params
   const [orbitRadius, setOrbitRadius] = useState('3');
   const [orbitPeriod, setOrbitPeriod] = useState('5');
+
+  // Wave params
+  const [waveAmplitude, setWaveAmplitude] = useState('1');
+  const [waveWavelength, setWaveWavelength] = useState('2');
+  const [waveFrequency, setWaveFrequency] = useState('0.5');
+
+  // Electric field params
+  const [charge1, setCharge1] = useState('1');
+  const [charge2, setCharge2] = useState('-1');
+  const [chargeDistance, setChargeDistance] = useState('4');
+
+  // Magnetic field params
+  const [wireCurrent, setWireCurrent] = useState('5');
+  const [wireLength, setWireLength] = useState('4');
 
   const handleReset = () => {
     setIsPlaying(false);
@@ -385,6 +689,99 @@ Kepler's 3rd Law:
   T² ∝ r³`);
   };
 
+  const calculateWave = () => {
+    const A = parseFloat(waveAmplitude);
+    const lambda = parseFloat(waveWavelength);
+    const f = parseFloat(waveFrequency);
+    
+    const v = lambda * f;
+    const k = (2 * Math.PI) / lambda;
+    const omega = 2 * Math.PI * f;
+    const T = 1 / f;
+    
+    setResult(`Wave Analysis
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Amplitude: ${A} m
+Wavelength: ${lambda} m
+Frequency: ${f} Hz
+
+▸ Wave Speed: ${v.toFixed(3)} m/s
+▸ Period: ${T.toFixed(3)} s
+▸ Wave Number (k): ${k.toFixed(3)} rad/m
+▸ Angular Frequency (ω): ${omega.toFixed(3)} rad/s
+
+Wave Equation:
+  y(x,t) = A·sin(kx - ωt)
+  y(x,t) = ${A}·sin(${k.toFixed(2)}x - ${omega.toFixed(2)}t)
+
+Relations:
+  v = λf = ω/k
+  T = 1/f = 2π/ω`);
+  };
+
+  const calculateElectricField = () => {
+    const q1 = parseFloat(charge1);
+    const q2 = parseFloat(charge2);
+    const d = parseFloat(chargeDistance);
+    const k = 8.99e9; // Coulomb's constant
+    
+    const force = (k * Math.abs(q1 * q2)) / (d * d);
+    const midpointField = k * Math.abs(q1) / ((d/2) ** 2) + k * Math.abs(q2) / ((d/2) ** 2);
+    const potential = k * q1 / (d/2) + k * q2 / (d/2);
+    
+    setResult(`Electric Field Analysis
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Charge 1: ${q1 > 0 ? '+' : ''}${q1} C (${q1 > 0 ? 'positive' : 'negative'})
+Charge 2: ${q2 > 0 ? '+' : ''}${q2} C (${q2 > 0 ? 'positive' : 'negative'})
+Distance: ${d} m
+
+▸ Coulomb Force: ${force.toExponential(3)} N
+▸ Force Type: ${q1 * q2 > 0 ? 'Repulsive' : 'Attractive'}
+
+Field at Midpoint:
+▸ |E| ≈ ${midpointField.toExponential(3)} N/C
+
+Equations:
+  F = k·q₁·q₂/r²
+  E = k·q/r²
+  V = k·q/r
+
+Coulomb's Constant:
+  k = 8.99 × 10⁹ N·m²/C²`);
+  };
+
+  const calculateMagneticField = () => {
+    const I = parseFloat(wireCurrent);
+    const L = parseFloat(wireLength);
+    const mu0 = 4 * Math.PI * 1e-7; // Permeability of free space
+    
+    const r1 = 0.1; // 10 cm from wire
+    const B1 = (mu0 * Math.abs(I)) / (2 * Math.PI * r1);
+    
+    const r2 = 0.5; // 50 cm from wire
+    const B2 = (mu0 * Math.abs(I)) / (2 * Math.PI * r2);
+    
+    setResult(`Magnetic Field Analysis
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Current: ${I} A (${I > 0 ? 'upward' : 'downward'})
+Wire Length: ${L} m
+
+▸ B at r=10cm: ${B1.toExponential(3)} T
+▸ B at r=50cm: ${B2.toExponential(3)} T
+
+Field Direction: ${I > 0 ? 'Counter-clockwise' : 'Clockwise'} (view from above)
+
+Equations:
+  B = μ₀I/(2πr)  (infinite wire)
+
+Right-Hand Rule:
+  Thumb → Current direction
+  Fingers → Magnetic field direction
+
+Constants:
+  μ₀ = 4π × 10⁻⁷ T·m/A`);
+  };
+
   return (
     <div className="space-y-4 animate-fade-in-up">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -393,11 +790,14 @@ Kepler's 3rd Law:
       </div>
 
       <Tabs value={simulation} onValueChange={(v) => { setSimulation(v as any); handleReset(); }}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="projectile">Projectile</TabsTrigger>
-          <TabsTrigger value="pendulum">Pendulum</TabsTrigger>
-          <TabsTrigger value="spring">Spring</TabsTrigger>
-          <TabsTrigger value="orbit">Orbit</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-7 h-auto">
+          <TabsTrigger value="projectile" className="text-xs py-2">Projectile</TabsTrigger>
+          <TabsTrigger value="pendulum" className="text-xs py-2">Pendulum</TabsTrigger>
+          <TabsTrigger value="spring" className="text-xs py-2">Spring</TabsTrigger>
+          <TabsTrigger value="orbit" className="text-xs py-2">Orbit</TabsTrigger>
+          <TabsTrigger value="wave" className="text-xs py-2">Wave</TabsTrigger>
+          <TabsTrigger value="electric" className="text-xs py-2">E-Field</TabsTrigger>
+          <TabsTrigger value="magnetic" className="text-xs py-2">B-Field</TabsTrigger>
         </TabsList>
 
         {/* 3D Canvas */}
@@ -432,6 +832,29 @@ Kepler's 3rd Law:
                 <OrbitalMotion 
                   radius={parseFloat(orbitRadius)}
                   period={parseFloat(orbitPeriod)}
+                  isPlaying={isPlaying}
+                />
+              )}
+              {simulation === 'wave' && (
+                <WaveSimulation 
+                  amplitude={parseFloat(waveAmplitude)}
+                  wavelength={parseFloat(waveWavelength)}
+                  frequency={parseFloat(waveFrequency)}
+                  isPlaying={isPlaying}
+                />
+              )}
+              {simulation === 'electric' && (
+                <ElectricField 
+                  charge1={parseFloat(charge1)}
+                  charge2={parseFloat(charge2)}
+                  distance={parseFloat(chargeDistance)}
+                  isPlaying={isPlaying}
+                />
+              )}
+              {simulation === 'magnetic' && (
+                <MagneticField 
+                  current={parseFloat(wireCurrent)}
+                  wireLength={parseFloat(wireLength)}
                   isPlaying={isPlaying}
                 />
               )}
@@ -518,6 +941,58 @@ Kepler's 3rd Law:
             </div>
           </div>
           <Button onClick={calculateOrbit} className="w-full">Calculate Orbit</Button>
+        </TabsContent>
+
+        <TabsContent value="wave" className="space-y-4 mt-4">
+          <div className="glass-panel p-4 grid grid-cols-3 gap-3">
+            <div>
+              <label className="text-xs text-muted-foreground">Amplitude (m)</label>
+              <Input value={waveAmplitude} onChange={(e) => setWaveAmplitude(e.target.value)} className="font-mono" />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground">Wavelength (m)</label>
+              <Input value={waveWavelength} onChange={(e) => setWaveWavelength(e.target.value)} className="font-mono" />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground">Frequency (Hz)</label>
+              <Input value={waveFrequency} onChange={(e) => setWaveFrequency(e.target.value)} className="font-mono" />
+            </div>
+          </div>
+          <Button onClick={calculateWave} className="w-full">Calculate Wave Properties</Button>
+        </TabsContent>
+
+        <TabsContent value="electric" className="space-y-4 mt-4">
+          <div className="glass-panel p-4 grid grid-cols-3 gap-3">
+            <div>
+              <label className="text-xs text-muted-foreground">Charge 1 (C)</label>
+              <Input value={charge1} onChange={(e) => setCharge1(e.target.value)} className="font-mono" />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground">Charge 2 (C)</label>
+              <Input value={charge2} onChange={(e) => setCharge2(e.target.value)} className="font-mono" />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground">Distance (m)</label>
+              <Input value={chargeDistance} onChange={(e) => setChargeDistance(e.target.value)} className="font-mono" />
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground">Red = positive charge, Blue = negative charge</p>
+          <Button onClick={calculateElectricField} className="w-full">Calculate Electric Field</Button>
+        </TabsContent>
+
+        <TabsContent value="magnetic" className="space-y-4 mt-4">
+          <div className="glass-panel p-4 grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs text-muted-foreground">Current (A)</label>
+              <Input value={wireCurrent} onChange={(e) => setWireCurrent(e.target.value)} className="font-mono" />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground">Wire Length (m)</label>
+              <Input value={wireLength} onChange={(e) => setWireLength(e.target.value)} className="font-mono" />
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground">Purple rings = magnetic field (B). Arrow indicates current direction.</p>
+          <Button onClick={calculateMagneticField} className="w-full">Calculate Magnetic Field</Button>
         </TabsContent>
       </Tabs>
 
