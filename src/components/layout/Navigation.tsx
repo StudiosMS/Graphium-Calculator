@@ -12,7 +12,8 @@ import {
   Equal,
   Binary,
   Zap,
-  BookOpen
+  BookOpen,
+  Box
 } from 'lucide-react';
 
 export type CalculatorMode = 
@@ -27,7 +28,8 @@ export type CalculatorMode =
   | 'complex'
   | 'equations'
   | 'base'
-  | 'physics';
+  | 'physics'
+  | 'physics3d';
 
 interface NavigationProps {
   activeMode: CalculatorMode;
@@ -44,6 +46,7 @@ const modes = [
   { id: 'complex', label: 'Complex', icon: Atom, description: 'Complex numbers' },
   { id: 'statistics', label: 'Statistics', icon: BarChart3, description: 'Data analysis & regression' },
   { id: 'physics', label: 'Physics', icon: Zap, description: 'Physics formulas' },
+  { id: 'physics3d', label: '3D Physics', icon: Box, description: '3D simulations' },
   { id: 'units', label: 'Units', icon: Scale, description: 'Unit conversion' },
   { id: 'base', label: 'Base Conv.', icon: Binary, description: 'Number base converter' },
   { id: 'errors', label: 'Error Check', icon: AlertCircle, description: 'Expression validation' },

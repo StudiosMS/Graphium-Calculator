@@ -13,6 +13,7 @@ import { ComplexCalculator } from '@/components/calculator/ComplexCalculator';
 import { EquationSolver } from '@/components/calculator/EquationSolver';
 import { BaseConverter } from '@/components/calculator/BaseConverter';
 import { PhysicsCalculator } from '@/components/calculator/PhysicsCalculator';
+import { Physics3DCalculator } from '@/components/calculator/Physics3DCalculator';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const Index = () => {
@@ -39,6 +40,8 @@ const Index = () => {
         return <StatisticsCalculator />;
       case 'physics':
         return <PhysicsCalculator />;
+      case 'physics3d':
+        return <Physics3DCalculator />;
       case 'units':
         return <UnitConverter />;
       case 'base':
