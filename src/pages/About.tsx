@@ -163,7 +163,7 @@ export default function About() {
             </p>
             <div className="flex justify-center">
               <Button variant="outline" size="sm" asChild className="hover:bg-primary hover:text-primary-foreground transition-colors">
-                <a href="https://github.com/ShubhaRijal" target="_blank" rel="noopener noreferrer">
+                <a href="https://github.com/StudiosMS" target="_blank" rel="noopener noreferrer">
                   <Github className="h-4 w-4 mr-2" />
                   MS Studios Github
                 </a>
